@@ -5,18 +5,35 @@
 
     <ImageView
         android:id="@+id/photo"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:contentDescription="@string/client_photo" />
+        android:src="@mipmap/ic_launcher"
+        android:paddingTop="4dp"
+        android:paddingLeft="4dp"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:gravity="center"
+        android:contentDescription="@string/client_photo"/>
 
     <TextView
         android:id="@+id/first_name"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
         android:paddingLeft="10dp"
-        android:paddingTop="10dp"
         android:textStyle="bold"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/button_dec"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="@string/button_dec"
+        android:backgroundTint="@android:color/holo_red_light" />
+
+    <Button
+        android:id="@+id/button_inc"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:text="@string/button_inc"
+        android:backgroundTint="@android:color/holo_green_light" />
 
 </LinearLayout>

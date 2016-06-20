@@ -4,17 +4,20 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -42,14 +45,13 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_add_client);
-        fab.setOnClickListener(new View.OnClickListener() {
+        Button buttonAddClient = (Button) findViewById(R.id.button_add_client);
+        buttonAddClient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO: Вызов добавления нового клиента
 
-                // Для теста
-                // Получаем картинку из ресурсов
+                // Для тестирования Базы данных и отображения
                 Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
                 Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity
                 // Получаем текущую дату
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
                 // Добавляем запись в БД
-                AppDataBase.getInstance().addClient("Вася", "Попович", "Попов", sdf.format(new Date()), stream.toByteArray());
+                AppDataBase.getInstance().addClient("Дмитрий", "Попович", "Попов", sdf.format(new Date()), stream.toByteArray());
                 // Обновляем список
                 getLoaderManager().getLoader(0).forceLoad();
             }
@@ -77,7 +79,17 @@ public class MainActivity extends AppCompatActivity
                 switch (view.getId()) {
                     case R.id.photo:
                         byte[] data = cursor.getBlob(columnIndex);
-                        ((ImageView) view).setImageBitmap(BitmapFactory.decodeByteArray(data, 0, data.length));
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+                        BitmapShader shader = new BitmapShader (bitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                        Paint paint = new Paint();
+                        paint.setShader(shader);
+
+                        Canvas c = new Canvas(circleBitmap);
+                        c.drawCircle(bitmap.getWidth()/2, bitmap.getHeight()/2, bitmap.getWidth()/2, paint);
+
+                        ((ImageView) view).setImageBitmap(circleBitmap);
                         return true;
                     default:
                         return false;
@@ -101,6 +113,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         getLoaderManager().destroyLoader(0);
     }
 
@@ -111,7 +124,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onQueryTextChange(String text) {
-        //TODO: Вызов фильтра списка клиентов
         scAdapter.getFilter().filter(text);
         return false;
     }
@@ -143,6 +155,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public Cursor loadInBackground() { return AppDataBase.getInstance().getClients(); }
+        public Cursor loadInBackground() {
+            return AppDataBase.getInstance().getClients();
+        }
     }
 }

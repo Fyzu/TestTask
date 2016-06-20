@@ -4,4 +4,6 @@
     <string name="title_report">Отчет</string>
     <string name="title_add_client">Добавить клиента</string>
     <string name="client_photo">Фотография клиента</string>
+    <string name="button_inc">+</string>
+    <string name="button_dec">-</string>
 </resources>
