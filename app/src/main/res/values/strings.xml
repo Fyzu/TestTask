@@ -3,4 +3,5 @@
     <string name="title_clients">Список клиентов</string>
     <string name="title_report">Отчет</string>
     <string name="title_add_client">Добавить клиента</string>
+    <string name="client_photo">Фотография клиента</string>
 </resources>
