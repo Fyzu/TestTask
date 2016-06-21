@@ -29,17 +29,15 @@ public class AddClientActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST = 1888;
 
-    SimpleDateFormat sdf;
-    DatePickerDialog datePickerDialog;
-
-    AutoCompleteTextView firstName;
-    AutoCompleteTextView lastName;
-    AutoCompleteTextView middleName;
-    AutoCompleteTextView phone;
-    EditText date;
-    ImageView viewImage;
-
-    Bitmap photo;
+    private SimpleDateFormat sdf;
+    private DatePickerDialog datePickerDialog;
+    private AutoCompleteTextView firstName;
+    private AutoCompleteTextView lastName;
+    private AutoCompleteTextView middleName;
+    private AutoCompleteTextView phone;
+    private EditText date;
+    private ImageView viewImage;
+    private Bitmap photo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +46,7 @@ public class AddClientActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Создаю DatePicketDialog
         sdf = new SimpleDateFormat("yyyy.MM.dd");
         Calendar calendar = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
@@ -60,11 +59,13 @@ public class AddClientActivity extends AppCompatActivity {
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
+        // Получаю view всех полей
         firstName = (AutoCompleteTextView) findViewById(R.id.first_name);
         lastName = (AutoCompleteTextView) findViewById(R.id.last_name);
         middleName = (AutoCompleteTextView) findViewById(R.id.middle_name);
         phone = (AutoCompleteTextView) findViewById(R.id.phone);
         date = (EditText) findViewById(R.id.date);
+        // Устанавливаем слушатели на поле date, дабы вызвать datePickerDialog
         date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -77,22 +78,25 @@ public class AddClientActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
+        // Устанавливаем слушатели на нажатие изображения
         viewImage = (ImageView) findViewById(R.id.photo);
         viewImage.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Вызываем камеру
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
             }
         });
 
-        // Кнопка входа
+        // Кнопка сохранения результата
         Button saveButton = (Button) findViewById(R.id.button_save);
         saveButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
 
+                // Проверяем заполнены ли обязательные поля
                 boolean errors = false;
                 if(firstName.getText().toString().isEmpty()) {
                     errors = true;
@@ -115,20 +119,25 @@ public class AddClientActivity extends AppCompatActivity {
                     return;
                 }
 
-                Intent intent = new Intent();
-                intent.putExtra(AppDataBase.COLUMN_FIRST_NAME, firstName.getText().toString());
-                intent.putExtra(AppDataBase.COLUMN_LAST_NAME, lastName.getText().toString());
-                intent.putExtra(AppDataBase.COLUMN_MIDDLE_NAME, middleName.getText().toString());
-                intent.putExtra(AppDataBase.COLUMN_PHONE_NUMBER, phone.getText().toString());
-                intent.putExtra(AppDataBase.COLUMN_DATE, date.getText().toString());
+                // Добавляем новую запись в базу
+                byte[] img;
                 if(photo != null) {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    intent.putExtra(AppDataBase.COLUMN_IMAGE, stream.toByteArray());
+                    img = stream.toByteArray();
                 } else {
-                    intent.putExtra(AppDataBase.COLUMN_IMAGE, new byte[]{});
+                    img = new byte[]{};
                 }
-                setResult(RESULT_OK, intent);
+                AppDataBase.getInstance().addClient(
+                    firstName.getText().toString(),
+                    lastName.getText().toString(),
+                    middleName.getText().toString(),
+                    phone.getText().toString(),
+                    date.getText().toString(),
+                    img
+                );
+
+                // Завершаем активность
                 finish();
             }
         });
@@ -136,8 +145,9 @@ public class AddClientActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
+            // Получаем данные фотографии
             photo = (Bitmap) data.getExtras().get("data");
-            // Отрисовываю круг вокруг фотографии
+            // Отрисовываю круг вокруг фотографии и устанавливаем в imageView
             Bitmap circleBitmap = Bitmap.createBitmap(photo.getWidth(), photo.getHeight(), Bitmap.Config.ARGB_8888);
             BitmapShader shader = new BitmapShader (photo,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             Paint paint = new Paint();

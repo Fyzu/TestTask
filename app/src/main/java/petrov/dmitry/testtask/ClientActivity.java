@@ -54,6 +54,7 @@ public class ClientActivity extends AppCompatActivity
 
         id = getIntent().getLongExtra(AppDataBase.COLUMN_ID, -1);
 
+        // Создаем datePickerDialog
         sdf = new SimpleDateFormat("yyyy.MM.dd");
         Calendar calendar = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
@@ -64,6 +65,7 @@ public class ClientActivity extends AppCompatActivity
             }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
+        // Заполяем поля текущими данными клиента
         Cursor cursor = AppDataBase.getInstance().getClient(id);
         firstName = (AutoCompleteTextView) findViewById(R.id.first_name);
         firstName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)));
@@ -85,6 +87,7 @@ public class ClientActivity extends AppCompatActivity
             public void onClick(View view) {
 
                 if(editable) {
+                    // Проверяем заполнены ли обязательные поля
                     boolean errors = false;
                     if (firstName.getText().toString().isEmpty()) {
                         errors = true;
@@ -107,6 +110,7 @@ public class ClientActivity extends AppCompatActivity
                         return;
                     }
 
+                    // Обновление записи
                     AppDataBase.getInstance().updateClient(id,
                             firstName.getText().toString(),
                             lastName.getText().toString(),
@@ -116,8 +120,10 @@ public class ClientActivity extends AppCompatActivity
                     );
                 }
 
+                // Отключаю изменение полей
                 setEditable(!editable);
 
+                // Обновляю список транзакций
                 getLoaderManager().getLoader(0).forceLoad();
             }
         });
@@ -127,18 +133,21 @@ public class ClientActivity extends AppCompatActivity
         // Формируем столбцы сопоставления
         String[] fromDB = new String[]{AppDataBase.COLUMN_DATE, AppDataBase.COLUMN_COST, AppDataBase.COLUMN_ID};
         int[] toView = new int[]{R.id.date, R.id.balance, R.id.transaction_item};
-
+        // Устанавливаем адаптер на listView
         scAdapter = new SimpleCursorAdapter(this, R.layout.transaction_item, null, fromDB, toView, 0);
         listView.setAdapter(scAdapter);
+        // Добавляем собственный viewBinder
         SimpleCursorAdapter.ViewBinder viewBinder = new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, final Cursor cursor, final int columnIndex){
                 switch (view.getId()) {
                     case R.id.transaction_item:
+                        // Меняем видимость и устанавливаем слушатель на кнопку удаления транзакиции
                         view.findViewById(R.id.button_del).setVisibility(editable? View.VISIBLE : View.INVISIBLE);
                         view.findViewById(R.id.button_del).setOnClickListener(editable? new DelClick(cursor.getLong(columnIndex)) : null);
                         return true;
                     case R.id.balance:
+                        // Устанавливаем сумму тразакции, так же определяем знак транзакции
                         long cost = cursor.getLong(columnIndex);
                         if(cost > 0) {
                             ((TextView) view).setText(String.format("+%s", String.valueOf(cost)));
@@ -196,6 +205,7 @@ public class ClientActivity extends AppCompatActivity
         phone.setEnabled(editable);
         date.setEnabled(editable);
 
+        // Устанавливаем слушатели на дату рождения
         if(editable) {
             date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -224,16 +234,18 @@ public class ClientActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-
+        // Расчитываем баланс
         BigInteger sum = BigInteger.ZERO;
         if (cursor.moveToFirst())
             do {
                 sum = sum.add(BigInteger.valueOf(cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_COST))));
             } while (cursor.moveToNext());
+        // Устанавливаем баланс
+        balance.setText(sum.toString());
 
+        // Обновляем список записей
         scAdapter.swapCursor(cursor);
         setListViewHeightBasedOnChildren(listView);
-        balance.setText(sum.toString());
     }
 
     @Override
@@ -259,6 +271,7 @@ public class ClientActivity extends AppCompatActivity
         }
     }
 
+    // Модифицированный callback нажатия, для хранения уникальных данных
     private class DelClick implements View.OnClickListener {
 
         private long id;

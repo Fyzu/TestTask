@@ -246,6 +246,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // Модифицированный callback нажатия, для хранения уникальных данных
     private class ItemClick implements View.OnClickListener {
 
         private long id;
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onClick(View view) {
+            // Вызываем активность клиента
             Intent intent = new Intent(getApplicationContext(), ClientActivity.class);
             intent.putExtra(AppDataBase.COLUMN_ID, id);
             startActivityForResult(intent, 2);
