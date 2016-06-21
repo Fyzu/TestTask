@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -28,14 +29,14 @@ import petrov.dmitry.testtask.Utility.AppDataBase;
 public class ClientActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>  {
 
-    private AutoCompleteTextView firstName;
-    private AutoCompleteTextView lastName;
-    private AutoCompleteTextView middleName;
-    private AutoCompleteTextView phone;
-    private AutoCompleteTextView date;
+    private EditText firstName;
+    private EditText lastName;
+    private EditText middleName;
+    private EditText phone;
+    private EditText date;
     private ListView listView;
     private SimpleCursorAdapter scAdapter;
-    private AutoCompleteTextView balance;
+    private EditText balance;
 
     private Button saveButton;
 
@@ -67,17 +68,17 @@ public class ClientActivity extends AppCompatActivity
 
         // Заполяем поля текущими данными клиента
         Cursor cursor = AppDataBase.getInstance().getClient(id);
-        firstName = (AutoCompleteTextView) findViewById(R.id.first_name);
+        firstName = (EditText) findViewById(R.id.first_name);
         firstName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)));
-        lastName = (AutoCompleteTextView) findViewById(R.id.last_name);
+        lastName = (EditText) findViewById(R.id.last_name);
         lastName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_LAST_NAME)));
-        middleName = (AutoCompleteTextView) findViewById(R.id.middle_name);
+        middleName = (EditText) findViewById(R.id.middle_name);
         middleName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_MIDDLE_NAME)));
-        phone = (AutoCompleteTextView) findViewById(R.id.phone);
+        phone = (EditText) findViewById(R.id.phone);
         phone.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_PHONE_NUMBER)));
-        date = (AutoCompleteTextView) findViewById(R.id.date);
+        date = (EditText) findViewById(R.id.date);
         date.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_DATE)));
-        balance = (AutoCompleteTextView) findViewById(R.id.balance);
+        balance = (EditText) findViewById(R.id.balance);
 
         // Кнопка входа
         saveButton = (Button) findViewById(R.id.button_save);
@@ -213,16 +214,9 @@ public class ClientActivity extends AppCompatActivity
                     if(hasFocus) datePickerDialog.show();
                 }
             });
-            date.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    datePickerDialog.show();
-                }
-            });
             saveButton.setText(getResources().getString(R.string.button_save));
         } else {
             date.setOnFocusChangeListener(null);
-            date.setOnClickListener(null);
             saveButton.setText(getResources().getString(R.string.button_edit));
         }
     }

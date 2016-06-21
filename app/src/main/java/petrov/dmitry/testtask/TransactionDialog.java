@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,7 +58,7 @@ public class TransactionDialog extends DialogFragment {
         ((Button) v.findViewById(R.id.button_save)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AutoCompleteTextView cost = (AutoCompleteTextView)v.findViewById(R.id.cost);
+                EditText cost = (EditText)v.findViewById(R.id.cost);
                 if(cost.getText().toString().isEmpty()) {
                     cost.setError(getResources().getString(R.string.error_required_field));
                     cost.requestFocus();

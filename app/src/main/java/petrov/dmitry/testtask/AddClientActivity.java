@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -31,10 +30,10 @@ public class AddClientActivity extends AppCompatActivity {
 
     private SimpleDateFormat sdf;
     private DatePickerDialog datePickerDialog;
-    private AutoCompleteTextView firstName;
-    private AutoCompleteTextView lastName;
-    private AutoCompleteTextView middleName;
-    private AutoCompleteTextView phone;
+    private EditText firstName;
+    private EditText lastName;
+    private EditText middleName;
+    private EditText phone;
     private EditText date;
     private ImageView viewImage;
     private Bitmap photo;
@@ -60,10 +59,10 @@ public class AddClientActivity extends AppCompatActivity {
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
         // Получаю view всех полей
-        firstName = (AutoCompleteTextView) findViewById(R.id.first_name);
-        lastName = (AutoCompleteTextView) findViewById(R.id.last_name);
-        middleName = (AutoCompleteTextView) findViewById(R.id.middle_name);
-        phone = (AutoCompleteTextView) findViewById(R.id.phone);
+        firstName = (EditText) findViewById(R.id.first_name);
+        lastName = (EditText) findViewById(R.id.last_name);
+        middleName = (EditText) findViewById(R.id.middle_name);
+        phone = (EditText) findViewById(R.id.phone);
         date = (EditText) findViewById(R.id.date);
         // Устанавливаем слушатели на поле date, дабы вызвать datePickerDialog
         date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
