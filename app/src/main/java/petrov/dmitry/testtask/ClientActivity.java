@@ -1,9 +1,11 @@
 package petrov.dmitry.testtask;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -12,36 +14,35 @@ import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import petrov.dmitry.testtask.Utility.AppDataBase;
 
-public class ClientActivity extends AppCompatActivity {
-
-
-    private ListView listView;
-    private SimpleCursorAdapter scAdapter;
-    private long id;
-
-    private SimpleDateFormat sdf;
-    private DatePickerDialog datePickerDialog;
+public class ClientActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor>  {
 
     private AutoCompleteTextView firstName;
     private AutoCompleteTextView lastName;
     private AutoCompleteTextView middleName;
     private AutoCompleteTextView phone;
-    private EditText date;
+    private AutoCompleteTextView date;
+    private ListView listView;
+    private SimpleCursorAdapter scAdapter;
+    private AutoCompleteTextView balance;
+
     private Button saveButton;
 
+    private SimpleDateFormat sdf;
+    private DatePickerDialog datePickerDialog;
+
+    private long id;
     private boolean editable = false;
 
     @Override
@@ -52,19 +53,18 @@ public class ClientActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         id = getIntent().getLongExtra(AppDataBase.COLUMN_ID, -1);
-        Cursor cursor = AppDataBase.getInstance().getClient(id);
+
         sdf = new SimpleDateFormat("yyyy.MM.dd");
         Calendar calendar = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, monthOfYear, dayOfMonth);
                 date.setText(sdf.format(calendar.getTime()));
             }
-
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
+        Cursor cursor = AppDataBase.getInstance().getClient(id);
         firstName = (AutoCompleteTextView) findViewById(R.id.first_name);
         firstName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)));
         lastName = (AutoCompleteTextView) findViewById(R.id.last_name);
@@ -73,8 +73,9 @@ public class ClientActivity extends AppCompatActivity {
         middleName.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_MIDDLE_NAME)));
         phone = (AutoCompleteTextView) findViewById(R.id.phone);
         phone.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_PHONE_NUMBER)));
-        date = (EditText) findViewById(R.id.date);
+        date = (AutoCompleteTextView) findViewById(R.id.date);
         date.setText(cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_DATE)));
+        balance = (AutoCompleteTextView) findViewById(R.id.balance);
 
         // Кнопка входа
         saveButton = (Button) findViewById(R.id.button_save);
@@ -106,12 +107,18 @@ public class ClientActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // TODO: Реализовать обновление записи
+                    AppDataBase.getInstance().updateClient(id,
+                            firstName.getText().toString(),
+                            lastName.getText().toString(),
+                            middleName.getText().toString(),
+                            phone.getText().toString(),
+                            date.getText().toString()
+                    );
                 }
 
                 setEditable(!editable);
 
-                scAdapter.swapCursor(AppDataBase.getInstance().getTransactions(id));
+                getLoaderManager().getLoader(0).forceLoad();
             }
         });
 
@@ -129,6 +136,7 @@ public class ClientActivity extends AppCompatActivity {
                 switch (view.getId()) {
                     case R.id.transaction_item:
                         view.findViewById(R.id.button_del).setVisibility(editable? View.VISIBLE : View.INVISIBLE);
+                        view.findViewById(R.id.button_del).setOnClickListener(editable? new DelClick(cursor.getLong(columnIndex)) : null);
                         return true;
                     case R.id.balance:
                         long cost = cursor.getLong(columnIndex);
@@ -145,9 +153,16 @@ public class ClientActivity extends AppCompatActivity {
         };
         scAdapter.setViewBinder(viewBinder);
 
-        // TODO: Переделать на курсор лоадер
-        scAdapter.swapCursor(AppDataBase.getInstance().getTransactions(id));
-        setListViewHeightBasedOnChildren(listView);
+        // Создаем лоадер для чтения данных
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Уничтожаем курсорладер
+        getLoaderManager().destroyLoader(0);
     }
 
     // Увеличиываем размер listView в зависимости от кол-ва элементов, дабы не было конфликтов с Scroll'ом
@@ -199,6 +214,63 @@ public class ClientActivity extends AppCompatActivity {
             date.setOnFocusChangeListener(null);
             date.setOnClickListener(null);
             saveButton.setText(getResources().getString(R.string.button_edit));
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int transactionId, Bundle args) {
+        return new TransactionsLoader(this, id);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        BigInteger sum = BigInteger.ZERO;
+        if (cursor.moveToFirst())
+            do {
+                sum = sum.add(BigInteger.valueOf(cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_COST))));
+            } while (cursor.moveToNext());
+
+        scAdapter.swapCursor(cursor);
+        setListViewHeightBasedOnChildren(listView);
+        balance.setText(sum.toString());
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        scAdapter.swapCursor(null);
+        setListViewHeightBasedOnChildren(listView);
+        balance.setText("0");
+    }
+
+    // Статический класс курсор лоадера для списка транзакций
+    private static class TransactionsLoader extends CursorLoader {
+
+        private long id;
+
+        public TransactionsLoader(Context context, long id) {
+            super(context);
+            this.id = id;
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            return AppDataBase.getInstance().getTransactions(id);
+        }
+    }
+
+    private class DelClick implements View.OnClickListener {
+
+        private long id;
+
+        public DelClick(long id) {
+            this.id = id;
+        }
+
+        @Override
+        public void onClick(View view) {
+            AppDataBase.getInstance().deleteTransaction(id);
+            getLoaderManager().getLoader(0).forceLoad();
         }
     }
 }

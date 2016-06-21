@@ -121,8 +121,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if(intent != null) {
-
+        if (intent != null) {
             AppDataBase.getInstance().addClient(
                     intent.getStringExtra(AppDataBase.COLUMN_FIRST_NAME),
                     intent.getStringExtra(AppDataBase.COLUMN_LAST_NAME),
@@ -130,11 +129,11 @@ public class MainActivity extends AppCompatActivity
                     intent.getStringExtra(AppDataBase.COLUMN_PHONE_NUMBER),
                     intent.getStringExtra(AppDataBase.COLUMN_DATE),
                     intent.getByteArrayExtra(AppDataBase.COLUMN_IMAGE)
-                );
-
-            // Обновляем список
-            getLoaderManager().getLoader(0).forceLoad();
+            );
         }
+
+        // Обновляем список
+        getLoaderManager().getLoader(0).forceLoad();
     }
 
     @Override
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity
         scAdapter.swapCursor(null);
     }
 
-    // Статический класс курсор лоадера для списка оповещений
+    // Статический класс курсор лоадера для списка клиентов
     private static class ClientsLoader extends CursorLoader {
 
         Context context;

@@ -118,7 +118,6 @@ public final class AppDataBase {
         return null;
     }
 
-
     @Nullable
     public Cursor getTransactions(long clientID) {
         if(DB.isOpen()) {
@@ -135,6 +134,18 @@ public final class AppDataBase {
         }
     }
 
+    public void updateClient(long id, String firstName, String lastName, String middleName, String phone, String date) {
+        if(DB.isOpen()) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(COLUMN_FIRST_NAME, firstName);
+            contentValues.put(COLUMN_LAST_NAME, lastName);
+            contentValues.put(COLUMN_MIDDLE_NAME, middleName);
+            contentValues.put(COLUMN_PHONE_NUMBER, phone);
+            contentValues.put(COLUMN_DATE, date);
+            DB.update(TABLE_CLIENTS, contentValues, String.format("%s = %s", COLUMN_ID, String.valueOf(id)), null);
+        }
+    }
+
     public void addClient(String firstName, String lastName, String middleName, String phone, String date, byte[] image) {
         if(DB.isOpen()) {
             ContentValues contentValues = new ContentValues();
@@ -146,6 +157,12 @@ public final class AppDataBase {
             contentValues.put(COLUMN_IMAGE, image);
             DB.insert(TABLE_CLIENTS, null, contentValues);
 
+        }
+    }
+
+    public void deleteTransaction(long id) {
+        if(DB.isOpen()) {
+            DB.delete(TABLE_TRANSACTIONS, String.format("%s = %s", COLUMN_ID, String.valueOf(id)), null);
         }
     }
 

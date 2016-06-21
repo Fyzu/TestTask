@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:focusableInTouchMode="true"
     tools:context="petrov.dmitry.testtask.AddClientActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -49,7 +50,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -126,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/client_date">
 
-                    <EditText
+                    <AutoCompleteTextView
                         android:id="@+id/date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -145,20 +148,19 @@
                     android:text="@string/transaction_flows"/>
 
                 <ListView
+                    android:id="@+id/listView"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    android:id="@+id/listView"/>
+                    android:layout_height="wrap_content"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/transaction_balance">
 
                     <AutoCompleteTextView
                         android:id="@+id/balance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/transaction_balance"
                         android:maxLines="1"
                         android:singleLine="true"
                         android:enabled="false"
