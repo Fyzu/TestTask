@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/client_item"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/photo"
-        android:src="@mipmap/ic_launcher"
-        android:paddingTop="4dp"
-        android:paddingLeft="4dp"
-        android:layout_width="46dp"
-        android:layout_height="46dp"
+        android:src="@drawable/photo_empty"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:gravity="center"
         android:contentDescription="@string/client_photo"/>
 

@@ -6,4 +6,15 @@
     <string name="client_photo">Фотография клиента</string>
     <string name="button_inc">+</string>
     <string name="button_dec">-</string>
+    <string name="client_phone">Телефон</string>
+    <string name="client_date">Дата рождения</string>
+    <string name="client_middle_name">Отчество (необязательно)</string>
+    <string name="client_last_name">Фамилия</string>
+    <string name="client_first_name">Имя</string>
+    <string name="error_required_field">Обязательное поле</string>
+    <string name="button_save">Сохранить</string>
+    <string name="transaction_cost">Сумма</string>
+    <string name="transaction_add_cost">Добавление средств</string>
+    <string name="transaction_subtract_cost">Произвели снятие средств у %s</string>
+    <string name="transaction_subtract_cost_error">У %s недостаточно средств</string>
 </resources>

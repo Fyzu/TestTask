@@ -3,6 +3,7 @@ package petrov.dmitry.testtask;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -23,10 +24,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
-
-import java.io.ByteArrayOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import android.widget.Toast;
 
 import petrov.dmitry.testtask.Utility.AppDataBase;
 
@@ -49,47 +47,56 @@ public class MainActivity extends AppCompatActivity
         buttonAddClient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: Вызов добавления нового клиента
-
-                // Для тестирования Базы данных и отображения
-                Drawable drawable = getResources().getDrawable(R.mipmap.ic_launcher);
-                Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                // Получаем текущую дату
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
-                // Добавляем запись в БД
-                AppDataBase.getInstance().addClient("Дмитрий", "Попович", "Попов", sdf.format(new Date()), stream.toByteArray());
-                // Обновляем список
-                getLoaderManager().getLoader(0).forceLoad();
+                startActivityForResult(new Intent(getApplicationContext(), AddClientActivity.class), 1);
             }
         });
 
         listView = (ListView) findViewById(R.id.listView);
 
         // Формируем столбцы сопоставления
-        String[] fromDB = new String[]{AppDataBase.COLUMN_IMAGE, AppDataBase.COLUMN_FIRST_NAME};
-        int[] toView = new int[]{R.id.photo, R.id.first_name};
+        String[] fromDB = new String[]{AppDataBase.COLUMN_IMAGE, AppDataBase.COLUMN_FIRST_NAME, AppDataBase.COLUMN_ID};
+        int[] toView = new int[]{R.id.photo, R.id.first_name, R.id.client_item};
 
         scAdapter = new SimpleCursorAdapter(this, R.layout.client_item, null, fromDB, toView, 0);
         listView.setAdapter(scAdapter);
         SimpleCursorAdapter.ViewBinder viewBinder = new SimpleCursorAdapter.ViewBinder() {
             @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex){
+            public boolean setViewValue(View view, final Cursor cursor, final int columnIndex){
                 switch (view.getId()) {
+                    case R.id.client_item:
+                        view.findViewById(R.id.button_inc).setOnClickListener(new IncButtonClick(
+                                cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID)),
+                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
+                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
+                                cursor.getBlob(cursor.getColumnIndex(AppDataBase.COLUMN_IMAGE)))
+                        );
+
+                        view.findViewById(R.id.button_dec).setOnClickListener(new DecButtonClick(
+                                cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID)),
+                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)))
+                        );
+
+                        return true;
+                    case R.id.button_dec:
+                        return true;
                     case R.id.photo:
                         byte[] data = cursor.getBlob(columnIndex);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
-                        BitmapShader shader = new BitmapShader (bitmap,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-                        Paint paint = new Paint();
-                        paint.setShader(shader);
+                        // Отрисовываю круг вокруг фотографии
+                        if(data.length > 0) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                            BitmapShader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                            Paint paint = new Paint();
+                            paint.setShader(shader);
+                            Canvas c = new Canvas(circleBitmap);
+                            c.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
 
-                        Canvas c = new Canvas(circleBitmap);
-                        c.drawCircle(bitmap.getWidth()/2, bitmap.getHeight()/2, bitmap.getWidth()/2, paint);
-
-                        ((ImageView) view).setImageBitmap(circleBitmap);
+                            ((ImageView) view).setImageBitmap(circleBitmap);
+                        } else {
+                            Drawable drawable = getResources().getDrawable(R.drawable.photo_empty);
+                            ((ImageView) view).setImageBitmap(((BitmapDrawable)drawable).getBitmap());
+                        }
                         return true;
                     default:
                         return false;
@@ -109,6 +116,24 @@ public class MainActivity extends AppCompatActivity
                 return AppDataBase.getInstance().getClients(constraint.toString());
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if(intent != null) {
+
+            AppDataBase.getInstance().addClient(
+                    intent.getStringExtra(AppDataBase.COLUMN_FIRST_NAME),
+                    intent.getStringExtra(AppDataBase.COLUMN_LAST_NAME),
+                    intent.getStringExtra(AppDataBase.COLUMN_MIDDLE_NAME),
+                    intent.getStringExtra(AppDataBase.COLUMN_PHONE_NUMBER),
+                    intent.getStringExtra(AppDataBase.COLUMN_DATE),
+                    intent.getByteArrayExtra(AppDataBase.COLUMN_IMAGE)
+                );
+
+            // Обновляем список
+            getLoaderManager().getLoader(0).forceLoad();
+        }
     }
 
     @Override
@@ -157,6 +182,53 @@ public class MainActivity extends AppCompatActivity
         @Override
         public Cursor loadInBackground() {
             return AppDataBase.getInstance().getClients();
+        }
+    }
+
+    private class IncButtonClick implements View.OnClickListener {
+
+        private long id;
+        private String firstName;
+        private String lastName;
+        private byte[] img;
+
+        public IncButtonClick(long id, String firstName, String lastName, byte[] img) {
+            this.id = id;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.img = img;
+        }
+
+        @Override
+        public void onClick(View view) {
+            new TransactionDialog(id, String.format("%s %s", firstName, lastName), img).show(getFragmentManager(), "TransactionDialog");
+        }
+    }
+
+    private class DecButtonClick implements View.OnClickListener {
+
+        private long id;
+        private String name;
+
+        public DecButtonClick(long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Cursor cursor = AppDataBase.getInstance().getTransactions(id);
+            long sum = 0;
+            if (cursor.moveToFirst())
+                do {
+                    sum += cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_COST));
+                } while (cursor.moveToNext());
+            if(sum <= 0) {
+                Toast.makeText(getApplication(), String.format(getResources().getString(R.string.transaction_subtract_cost_error), name), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplication(), String.format(getResources().getString(R.string.transaction_subtract_cost), name), Toast.LENGTH_SHORT).show();
+                AppDataBase.getInstance().addTransaction(id, -1000);
+            }
         }
     }
 }

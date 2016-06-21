@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.Nullable;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import petrov.dmitry.testtask.App;
 
@@ -83,6 +88,8 @@ public final class AppDataBase {
             dataBaseHelper.close();
     }
 
+
+    @Nullable
     public Cursor getClients() {
         if(DB.isOpen()) {
             return DB.rawQuery("SELECT * FROM " + TABLE_CLIENTS, null);
@@ -90,6 +97,7 @@ public final class AppDataBase {
         return null;
     }
 
+    @Nullable
     public Cursor getClients(String firstName) {
         if(DB.isOpen()) {
             return DB.query(true, TABLE_CLIENTS,
@@ -100,6 +108,8 @@ public final class AppDataBase {
         return null;
     }
 
+
+    @Nullable
     public Cursor getTransactions(long clientID) {
         if(DB.isOpen()) {
             return DB.rawQuery("SELECT * FROM " + TABLE_TRANSACTIONS  +
@@ -115,13 +125,13 @@ public final class AppDataBase {
         }
     }
 
-    public void addClient(String firstName, String lastName, String middleName, String date, byte[] image) {
+    public void addClient(String firstName, String lastName, String middleName, String phone, String date, byte[] image) {
         if(DB.isOpen()) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_FIRST_NAME, firstName);
             contentValues.put(COLUMN_LAST_NAME, lastName);
             contentValues.put(COLUMN_MIDDLE_NAME, middleName);
-            contentValues.put(COLUMN_PHONE_NUMBER, date);
+            contentValues.put(COLUMN_PHONE_NUMBER, phone);
             contentValues.put(COLUMN_DATE, date);
             contentValues.put(COLUMN_IMAGE, image);
             DB.insert(TABLE_CLIENTS, null, contentValues);
@@ -129,12 +139,13 @@ public final class AppDataBase {
         }
     }
 
-    public void addTransaction(long clientID, long cost, String date) {
+    public void addTransaction(long clientID, long cost) {
         if(DB.isOpen()) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_CLIENT_ID, clientID);
             contentValues.put(COLUMN_COST, cost);
-            contentValues.put(COLUMN_DATE, date);
+            SimpleDateFormat df = new SimpleDateFormat("dd.MMM.yyyy", Locale.ROOT);
+            contentValues.put(COLUMN_DATE, df.format(Calendar.getInstance().getTime()));
             DB.insert(TABLE_TRANSACTIONS, null, contentValues);
         }
     }

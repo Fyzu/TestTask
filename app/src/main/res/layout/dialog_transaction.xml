@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="400dp">
+
+    <ImageView
+        android:id="@+id/photo"
+        android:src="@drawable/photo_empty"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
+        android:contentDescription="@string/client_photo"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/full_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_weight="1"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <AutoCompleteTextView
+            android:id="@+id/cost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/transaction_cost"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:inputType="number|numberSigned|numberDecimal"
+            android:digits="0123456789" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_gravity="center"
+        android:text="@string/button_save"
+        android:layout_weight="1"/>
+</LinearLayout>
