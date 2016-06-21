@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">TestTask</string>
     <string name="title_clients">Список клиентов</string>
-    <string name="title_report">Отчет</string>
+    <string name="title_client">Информация о клиенте</string>
     <string name="title_add_client">Добавить клиента</string>
     <string name="client_photo">Фотография клиента</string>
     <string name="button_inc">+</string>
@@ -13,8 +13,11 @@
     <string name="client_first_name">Имя</string>
     <string name="error_required_field">Обязательное поле</string>
     <string name="button_save">Сохранить</string>
+    <string name="button_edit">Изменить</string>
+    <string name="transaction_balance">Остаток средств</string>
     <string name="transaction_cost">Сумма</string>
     <string name="transaction_add_cost">Добавление средств</string>
     <string name="transaction_subtract_cost">Произвели снятие средств у %s</string>
     <string name="transaction_subtract_cost_error">У %s недостаточно средств</string>
+    <string name="transaction_flows">Движение средств</string>
 </resources>

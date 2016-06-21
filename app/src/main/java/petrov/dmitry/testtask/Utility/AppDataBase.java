@@ -88,6 +88,16 @@ public final class AppDataBase {
             dataBaseHelper.close();
     }
 
+    @Nullable
+    public Cursor getClient(long id) {
+        if(DB.isOpen()) {
+            Cursor cursor = DB.rawQuery("SELECT * FROM " + TABLE_CLIENTS  +
+                    " where " + COLUMN_ID + " = ?", new String[] {Long.toString(id)});
+            cursor.moveToFirst();
+            return cursor;
+        }
+        return null;
+    }
 
     @Nullable
     public Cursor getClients() {

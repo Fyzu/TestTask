@@ -64,16 +64,17 @@ public class MainActivity extends AppCompatActivity
             public boolean setViewValue(View view, final Cursor cursor, final int columnIndex){
                 switch (view.getId()) {
                     case R.id.client_item:
-                        view.findViewById(R.id.button_inc).setOnClickListener(new IncButtonClick(
-                                cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID)),
+                        long id = cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID));
+                        ItemClick itemClick = new ItemClick(id);
+                        view.findViewById(R.id.first_name).setOnClickListener(itemClick);
+                        view.findViewById(R.id.photo).setOnClickListener(itemClick);
+                        view.findViewById(R.id.button_inc).setOnClickListener(new IncButtonClick(id,
                                 cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
                                 cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
                                 cursor.getBlob(cursor.getColumnIndex(AppDataBase.COLUMN_IMAGE)))
                         );
-
                         view.findViewById(R.id.button_dec).setOnClickListener(new DecButtonClick(
-                                cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID)),
-                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)))
+                                id, cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)))
                         );
 
                         return true;
@@ -229,6 +230,22 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getApplication(), String.format(getResources().getString(R.string.transaction_subtract_cost), name), Toast.LENGTH_SHORT).show();
                 AppDataBase.getInstance().addTransaction(id, -1000);
             }
+        }
+    }
+
+    private class ItemClick implements View.OnClickListener {
+
+        private long id;
+
+        public ItemClick(long id) {
+            this.id = id;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getApplicationContext(), ClientActivity.class);
+            intent.putExtra(AppDataBase.COLUMN_ID, id);
+            startActivityForResult(intent, 2);
         }
     }
 }

@@ -37,7 +37,8 @@
             android:maxLines="1"
             android:singleLine="true"
             android:inputType="number|numberSigned|numberDecimal"
-            android:digits="0123456789" />
+            android:digits="0123456789"
+            android:maxLength="16" />
 
     </android.support.design.widget.TextInputLayout>
 

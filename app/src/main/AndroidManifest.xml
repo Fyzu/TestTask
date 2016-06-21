@@ -24,12 +24,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".AddClientActivity"
             android:label="@string/title_add_client"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"/>
 
-        </activity>
+        <activity android:name=".ClientActivity"
+            android:label="@string/title_client"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
     </application>
 
 </manifest>
