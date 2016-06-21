@@ -27,16 +27,12 @@ public class TransactionDialog extends DialogFragment {
 
     private View v;
 
-    public TransactionDialog(long id, String fullName, byte[] img) {
+
+    public TransactionDialog setSettings(long id, String fullName, byte[] img) {
         this.id = id;
         this.fullName = fullName;
         this.img = img;
-    }
-
-    @Override
-    public void onCreate(Bundle instance) {
-        super.onCreate(instance);
-
+        return this;
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle instance) {

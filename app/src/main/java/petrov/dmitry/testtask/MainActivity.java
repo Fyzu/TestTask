@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View view) {
             // Вызываю модальное окно с транзакциями
-            new TransactionDialog(id, String.format("%s %s", firstName, lastName), img).show(getFragmentManager(), "TransactionDialog");
+            new TransactionDialog().setSettings(id, String.format("%s %s", firstName, lastName), img).show(getFragmentManager(), "TransactionDialog");
         }
     }
 
