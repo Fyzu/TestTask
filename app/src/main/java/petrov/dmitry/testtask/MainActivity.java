@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                         view.findViewById(R.id.photo).setOnClickListener(itemClick);
                         view.findViewById(R.id.button_inc).setOnClickListener(new IncButtonClick(id,
                                 cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
-                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_FIRST_NAME)),
+                                cursor.getString(cursor.getColumnIndex(AppDataBase.COLUMN_LAST_NAME)),
                                 cursor.getBlob(cursor.getColumnIndex(AppDataBase.COLUMN_IMAGE)))
                         );
                         view.findViewById(R.id.button_dec).setOnClickListener(new DecButtonClick(
