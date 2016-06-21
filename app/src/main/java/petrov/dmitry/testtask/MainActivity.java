@@ -26,6 +26,8 @@ import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import java.math.BigInteger;
+
 import petrov.dmitry.testtask.Utility.AppDataBase;
 
 public class MainActivity extends AppCompatActivity
@@ -33,7 +35,6 @@ public class MainActivity extends AppCompatActivity
 
     private ListView listView;
     private SimpleCursorAdapter scAdapter;
-
     private SearchView searchView;
 
     @Override
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Добавляем обработчик клика на кнопку добавить клиент
         Button buttonAddClient = (Button) findViewById(R.id.button_add_client);
         buttonAddClient.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,15 +58,17 @@ public class MainActivity extends AppCompatActivity
         // Формируем столбцы сопоставления
         String[] fromDB = new String[]{AppDataBase.COLUMN_IMAGE, AppDataBase.COLUMN_FIRST_NAME, AppDataBase.COLUMN_ID};
         int[] toView = new int[]{R.id.photo, R.id.first_name, R.id.client_item};
-
+        // Устанавливаем адаптер для нашего списка
         scAdapter = new SimpleCursorAdapter(this, R.layout.client_item, null, fromDB, toView, 0);
         listView.setAdapter(scAdapter);
+        // Создаем свой viewBinder
         SimpleCursorAdapter.ViewBinder viewBinder = new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, final Cursor cursor, final int columnIndex){
                 switch (view.getId()) {
                     case R.id.client_item:
                         long id = cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_ID));
+                        // Устанавливаем слушатели на клики
                         ItemClick itemClick = new ItemClick(id);
                         view.findViewById(R.id.first_name).setOnClickListener(itemClick);
                         view.findViewById(R.id.photo).setOnClickListener(itemClick);
@@ -78,12 +82,10 @@ public class MainActivity extends AppCompatActivity
                         );
 
                         return true;
-                    case R.id.button_dec:
-                        return true;
                     case R.id.photo:
+                        // Получаем фотографию
                         byte[] data = cursor.getBlob(columnIndex);
-
-                        // Отрисовываю круг вокруг фотографии
+                        // Отрисовываю круг вокруг фотографии, если фотография есть
                         if(data.length > 0) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                             Bitmap circleBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -109,9 +111,11 @@ public class MainActivity extends AppCompatActivity
         // Создаем лоадер для чтения данных
         getLoaderManager().initLoader(0, null, this);
 
+        // Добавляем слушатели для вьюхи поиска
         searchView = (SearchView) findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(this);
 
+        // Устанавливаем фильтр для адаптера
         scAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             public Cursor runQuery(CharSequence constraint) {
                 return AppDataBase.getInstance().getClients(constraint.toString());
@@ -121,6 +125,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        // Получаем данные из активности добавления клиента
         if (intent != null) {
             AppDataBase.getInstance().addClient(
                     intent.getStringExtra(AppDataBase.COLUMN_FIRST_NAME),
@@ -132,7 +137,7 @@ public class MainActivity extends AppCompatActivity
             );
         }
 
-        // Обновляем список
+        // Обновляем список после изменений
         getLoaderManager().getLoader(0).forceLoad();
     }
 
@@ -149,6 +154,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onQueryTextChange(String text) {
+        // Запрашиваем фильтр записей у адаптера
         scAdapter.getFilter().filter(text);
         return false;
     }
@@ -185,6 +191,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // Модифицированный callback нажатия, для хранения уникальных данных
     private class IncButtonClick implements View.OnClickListener {
 
         private long id;
@@ -201,10 +208,12 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onClick(View view) {
+            // Вызываю модальное окно с транзакциями
             new TransactionDialog(id, String.format("%s %s", firstName, lastName), img).show(getFragmentManager(), "TransactionDialog");
         }
     }
 
+    // Модифицированный callback нажатия, для хранения уникальных данных
     private class DecButtonClick implements View.OnClickListener {
 
         private long id;
@@ -218,12 +227,17 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View view) {
             Cursor cursor = AppDataBase.getInstance().getTransactions(id);
-            long sum = 0;
+
+            // Получаем баланс
+            BigInteger sum = BigInteger.ZERO;
             if (cursor.moveToFirst())
                 do {
-                    sum += cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_COST));
+                    sum = sum.add(BigInteger.valueOf(cursor.getLong(cursor.getColumnIndex(AppDataBase.COLUMN_COST))));
                 } while (cursor.moveToNext());
-            if(sum <= 0) {
+
+            // Проверка, возможно ли снятие средств у клиента
+            int compare = BigInteger.ZERO.compareTo(sum);
+            if(compare == 0 || compare == 1) {
                 Toast.makeText(getApplication(), String.format(getResources().getString(R.string.transaction_subtract_cost_error), name), Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getApplication(), String.format(getResources().getString(R.string.transaction_subtract_cost), name), Toast.LENGTH_SHORT).show();
